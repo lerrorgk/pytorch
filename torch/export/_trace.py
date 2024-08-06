@@ -37,7 +37,7 @@ from torch._export.passes.lift_constants_pass import (
     lift_constants_pass,
     rewrite_script_object_meta,
 )
-from torch._export.utils import placeholder_naming_pass, placeholder_prefixes
+from torch._export.utils import get_runtime_asserts_printer, placeholder_naming_pass, placeholder_prefixes
 from torch._export.verifier import SpecViolationError
 from torch._export.wrappers import _wrap_submodules
 from torch._functorch._aot_autograd.traced_function_transforms import (
@@ -685,6 +685,7 @@ def _export_to_aten_ir(
                     fake_mode.shape_env,
                     f"exported program: {first_call_function_nn_module_stack(gm.graph)}",
                     export=True,
+                    sympy_printer=get_runtime_asserts_printer(fake_mode.shape_env),
                 )
 
     # update output specs

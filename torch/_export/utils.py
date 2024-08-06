@@ -612,3 +612,36 @@ def placeholder_naming_pass(
             ):
                 constants[new_name] = constant
                 del constants[name]
+
+
+def get_runtime_asserts_printer(shape_env):
+    from torch.fx.experimental.symbolic_shapes import _PythonPrinter
+    
+    # no dynamic shapes here
+    if shape_env.dim_constraints is None:
+        return None
+
+    # easy access
+    symbol_to_source = shape_env.dim_constraints._dcp.symbol_to_source
+    src_to_debug_name = shape_env.source_name_to_debug_name
+
+    # map symbols to prettified source names
+    src_map = {}
+    for symbol, sources in symbol_to_source.items():
+        src = sources[0]
+        if not isinstance(src, torch._dynamo.source.ConstantSource):
+            name = src.name()
+            name = re.sub(
+                r"L\['([A-Za-z0-9_]+)'\]", r"\1", name  # replace L['foo']... with foo...
+            )
+            name = re.sub(
+                r"size\(\)\[(\d+)\]", r"size(\1)", name  # replace size()[..] with size(..)
+            )
+            src_map[symbol.name] = [name]
+
+    # be safe and default to symbol names for remaining symbols (includes unbacked)
+    for symbol in shape_env.var_to_range.keys():
+        if symbol.name not in src_map:
+            src_map[symbol.name] = [symbol.name]
+
+    return _PythonPrinter(src_map)
