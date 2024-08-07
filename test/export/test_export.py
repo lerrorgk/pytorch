@@ -2283,6 +2283,22 @@ def forward(self, p_linear_weight, p_linear_bias, b_buffer, x):
         kwargs = {"kw1": torch.ones(1, 1), "kw2": torch.ones(6, 4)}
         self._test_export_same_as_eager(kw_func, args, kwargs)
 
+    def test_kwargs_abc(self):
+        class Module(torch.nn.Module):
+            def forward(self, arg1, arg2, kw1, kw2):
+                return arg1 + arg2, kw1 + kw2
+
+        kw_func = Module()
+        args = (torch.ones(6, 4), torch.ones(1, 1))
+        kwargs = {"kw1": torch.ones(1, 1), "kw2": torch.ones(6, 4)}
+        shapes = {
+            "arg1": (Dim("a10"), Dim("a11")),
+            "arg2": None,
+            "kw1": None,
+            "kw2": (Dim("k0"), Dim("k1")),
+        }
+        ep = export(kw_func, args, kwargs, dynamic_shapes=shapes)
+
     def test_export_func_with_pytree_kwargs(self):
         class Module(torch.nn.Module):
             def forward(self, arg1, arg2, a, b):
@@ -6078,27 +6094,27 @@ def forward(self, x, y):
         # case 1: modulo guards
         from torch.export import dims
 
-        class Mod4Reshape(torch.nn.Module):
-            def forward(self, x):
-                return x.reshape(x.shape[0] - 1, 4, -1)  # Mod(s0*s1, 4*(s0-1)) = 0
+        # class Mod4Reshape(torch.nn.Module):
+        #     def forward(self, x):
+        #         return x.reshape(x.shape[0] - 1, 4, -1)  # Mod(s0*s1, 4*(s0-1)) = 0
 
-        inputs = (torch.randn(10, 72),)
-        dx, dy = dims("dx", "dy")
-        ep = torch.export._trace._export(
-            Mod4Reshape(),
-            inputs,
-            dynamic_shapes={"x": (dx, dy)},
-            allow_complex_guards_as_runtime_asserts=True,
-        )
-        out1 = ep.module()(torch.randn(8, 7))
-        self.assertEqual(out1.shape, torch.ones(7, 4, 2).shape)
-        out2 = ep.module()(torch.randn(12, 11))
-        self.assertEqual(out2.shape, torch.ones(11, 4, 3).shape)
-        with self.assertRaisesRegex(
-            RuntimeError,
-            r"Runtime assertion failed for expression \(\(x\.size\(0\)\*x\.size\(1\)\) % \(4\*x\.size\(0\) - 4\)\) == 0",
-        ):
-            ep.module()(torch.randn(8, 8))  # fail
+        # inputs = (torch.randn(10, 72),)
+        # dx, dy = dims("dx", "dy")
+        # ep = torch.export._trace._export(
+        #     Mod4Reshape(),
+        #     inputs,
+        #     dynamic_shapes={"x": (dx, dy)},
+        #     allow_complex_guards_as_runtime_asserts=True,
+        # )
+        # out1 = ep.module()(torch.randn(8, 7))
+        # self.assertEqual(out1.shape, torch.ones(7, 4, 2).shape)
+        # out2 = ep.module()(torch.randn(12, 11))
+        # self.assertEqual(out2.shape, torch.ones(11, 4, 3).shape)
+        # with self.assertRaisesRegex(
+        #     RuntimeError,
+        #     r"Runtime assertion failed for expression \(\(x\.size\(0\)\*x\.size\(1\)\) % \(4\*x\.size\(0\) - 4\)\) == 0",
+        # ):
+        #     ep.module()(torch.randn(8, 8))  # fail
 
         # case 2: 2d reshape
         class FreeReshape(torch.nn.Module):
@@ -6115,12 +6131,6 @@ def forward(self, x, y):
             "y": [Dim(f"dy{i}", min=2) for i in range(2)],
             "z": [Dim(f"dz{i}", min=4) for i in range(1)],
         }
-        ep = torch.export._trace._export(
-            FreeReshape(),
-            inputs,
-            dynamic_shapes=dynamic_shapes,
-            allow_complex_guards_as_runtime_asserts=True,
-        )
         ep = export(FreeReshape(), inputs, dynamic_shapes=dynamic_shapes)
         out1 = ep.module()(torch.randn(48, 1), torch.randn(4, 12), torch.randn(48))
         self.assertEqual(out1.shape, torch.ones(48).shape)

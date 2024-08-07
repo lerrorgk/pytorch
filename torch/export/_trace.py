@@ -26,6 +26,7 @@ from torch._export.non_strict_utils import (
     make_constraints,
     make_fake_inputs,
     produce_guards_and_solve_constraints,
+    replace_non_strict_symbol_sources,
 )
 from torch._export.passes._node_metadata_hook import (
     _node_metadata_hook,
@@ -1813,7 +1814,7 @@ def _non_strict_export(
     fake_params_buffers = _fakify_params_buffers(fake_mode, mod)
 
     def _produce_guards_callback(gm):
-        return produce_guards_and_solve_constraints(
+        produce_guards_and_solve_constraints(
             fake_mode=fake_mode,
             gm=gm,
             dynamic_shapes=dynamic_shapes,
@@ -1821,6 +1822,8 @@ def _non_strict_export(
             original_signature=original_signature,
             _is_torch_jit_trace=_is_torch_jit_trace,
         )
+        # add function in non_strict_utils.py here to swap out sources for non-strict
+        replace_non_strict_symbol_sources(fake_mode.shape_env, _get_forward_arg_names(mod, args, kwargs))
 
     with fake_mode, _DataDependentErrorHandlerNonStrict():
         with _fakify_script_objects(mod, fake_args, fake_kwargs, fake_mode) as (
