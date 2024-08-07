@@ -48,6 +48,9 @@ RUN_CPU = (
 
 
 def run_not_on_Windows() -> bool:
+    """
+    TODO: It is temp disable, need enable them after fix issue.
+    """
     if not IS_WINDOWS:
         return True
     return False
