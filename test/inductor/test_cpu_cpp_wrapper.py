@@ -47,7 +47,7 @@ RUN_CPU = (
 )
 
 
-def is_Windows() -> bool:
+def is_windows() -> bool:
     """
     TODO:
     It is temp disable, need enable them after fix issue.
