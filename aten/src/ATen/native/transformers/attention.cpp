@@ -844,7 +844,7 @@ void reshape_attn_mask_to_4d(
 }
 
 #if AT_ONEDNN_GRAPH_ENABLED()
-void cpu_sdpa_forward_onednn_graph(
+static void cpu_sdpa_forward_onednn_graph(
     const Tensor& output,
     const at::Tensor& q,
     const at::Tensor& k,
