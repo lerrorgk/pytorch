@@ -9,7 +9,12 @@ from torch._inductor.test_case import TestCase as InductorTestCase
 from torch.testing._internal.common_device_type import (
     get_desired_device_type_test_bases,
 )
-from torch.testing._internal.common_utils import IS_MACOS, slowTest, TEST_WITH_ROCM
+from torch.testing._internal.common_utils import (
+    IS_MACOS,
+    IS_WINDOWS,
+    slowTest,
+    TEST_WITH_ROCM,
+)
 from torch.testing._internal.inductor_utils import HAS_CPU
 
 
@@ -40,6 +45,12 @@ RUN_CPU = (
     and any(getattr(x, "device_type", "") == "cpu" for x in _desired_test_bases)
     and not IS_MACOS
 )
+
+
+def run_not_on_Windows() -> bool:
+    if not IS_WINDOWS:
+        return True
+    return False
 
 
 class CppWrapperTemplate:
@@ -360,7 +371,7 @@ if RUN_CPU:
             "test_dynamic_qlinear",
             "cpu",
             test_mkldnn_pattern_matcher.TestPatternMatcher(),
-            condition=torch.backends.mkldnn.is_available(),
+            condition=torch.backends.mkldnn.is_available() and run_not_on_Windows(),
         ),
         BaseTest(
             "test_dynamic_qlinear_qat",
