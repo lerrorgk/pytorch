@@ -128,6 +128,3 @@
 	path = third_party/cpp-httplib
 	url = https://github.com/yhirose/cpp-httplib.git
 	branch = v0.15.3
-[submodule "third_party/etcd-cpp-apiv3"]
-	path = third_party/etcd-cpp-apiv3
-	url = https://github.com/etcd-cpp-apiv3/etcd-cpp-apiv3.git
