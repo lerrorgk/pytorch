@@ -3,8 +3,15 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <unordered_map>
+#include <mutex>
+#include <string>
+#include <vector>
+#include <optional>
+#include <chrono>
 
 #include <torch/csrc/distributed/c10d/Store.hpp>
+#include <etcd/Client.hpp>  // etcd client header
 
 namespace c10d {
 namespace detail {
@@ -152,6 +159,7 @@ class TORCH_API TCPStore : public Store {
   detail::SocketAddress addr_;
   std::shared_ptr<detail::TCPServer> server_;
   std::unique_ptr<detail::TCPClient> client_;
+  etcd::Client etcdClient_ = etcd::Client("http://127.0.0.1:2379", "http://127.0.0.1:2379");  // etcd client
   std::optional<std::size_t> numWorkers_;
 
   const std::string initKey_ = "init/";

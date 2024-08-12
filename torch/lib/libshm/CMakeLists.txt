@@ -15,6 +15,7 @@ endif()
 
 target_include_directories(shm PUBLIC
   ${TORCH_ROOT}/torch/lib # provides "libshm/libshm.h"
+  ${ETCD_CPP_API_INCLUDE_DIR}
 )
 
 ### Torch packages supposes libraries prefix is "lib"
@@ -68,6 +69,9 @@ else()
 endif()
 set_target_properties(torch_shm_manager PROPERTIES
   INSTALL_RPATH "${_rpath_portable_origin}/../lib")
+
+find_package(etcd-cpp-apiv3 REQUIRED)
+target_link_libraries(torch_shm_manager PRIVATE etcd-cpp-api)
 
 install(TARGETS shm LIBRARY DESTINATION ${LIBSHM_INSTALL_LIB_SUBDIR})
 install(FILES libshm.h DESTINATION "include")

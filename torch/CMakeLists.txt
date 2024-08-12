@@ -1,6 +1,8 @@
 # This file used to build libtorch.so.
 # Now it only builds the Torch python bindings.
 
+find_package(etcd-cpp-apiv3 REQUIRED)
+
 if(NOT CAFFE2_CMAKE_BUILDING_WITH_MAIN_REPO)
   cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
   project(torch CXX C)
@@ -73,7 +75,15 @@ set(TORCH_PYTHON_INCLUDE_DIRECTORIES
     ${TORCH_SRC_DIR}/csrc
     ${TORCH_SRC_DIR}/csrc/api/include
     ${TORCH_SRC_DIR}/lib
+    ${ETCD_CPP_API_INCLUDE_DIR}
     )
+
+# if(DEFINED ETCD_CPP_API_INCLUDE_DIR)
+#     message("etcd cpp api include dirs fuck: ${ETCD_CPP_API_INCLUDE_DIR}")
+# else()
+#     message("ETCD_CPP_API_INCLUDE_DIR is not defined fuck")
+# endif()
+
 
 list(APPEND TORCH_PYTHON_INCLUDE_DIRECTORIES ${LIBSHM_SRCDIR})
 
@@ -347,7 +357,7 @@ endif()
 
 target_compile_definitions(torch_python PRIVATE "-DTHP_BUILD_MAIN_LIB")
 
-target_link_libraries(torch_python PRIVATE ${TORCH_LIB} ${TORCH_PYTHON_LINK_LIBRARIES})
+target_link_libraries(torch_python PRIVATE ${TORCH_LIB} ${TORCH_PYTHON_LINK_LIBRARIES} etcd-cpp-api)
 
 target_compile_definitions(torch_python PRIVATE ${TORCH_PYTHON_COMPILE_DEFINITIONS})
 
