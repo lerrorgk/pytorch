@@ -39,13 +39,14 @@ add_executable(test_tensorexpr
   ${TENSOREXPR_TEST_ROOT}/padded_buffer.cpp
   ${TENSOREXPR_TEST_SRCS})
 
-target_link_libraries(test_tensorexpr PRIVATE torch gtest)
-target_include_directories(test_tensorexpr PRIVATE ${ATen_CPU_INCLUDE})
+find_package(etcd-cpp-apiv3 REQUIRED)
+target_link_libraries(test_tensorexpr PRIVATE torch gtest etcd-cpp-api)
+target_include_directories(test_tensorexpr PRIVATE ${ATen_CPU_INCLUDE} ${ETCD_CPP_API_INCLUDE_DIR})
 target_compile_definitions(test_tensorexpr PRIVATE USE_GTEST)
 
 add_executable(tutorial_tensorexpr ${TENSOREXPR_TEST_ROOT}/tutorial.cpp)
-target_link_libraries(tutorial_tensorexpr PRIVATE torch)
-target_include_directories(tutorial_tensorexpr PRIVATE ${ATen_CPU_INCLUDE})
+target_link_libraries(tutorial_tensorexpr PRIVATE torch etcd-cpp-api)
+target_include_directories(tutorial_tensorexpr PRIVATE ${ATen_CPU_INCLUDE} ${ETCD_CPP_API_INCLUDE_DIR})
 
 # The test case depends on the xnnpack header which in turn depends on the
 # pthreadpool header. For some build environment we need add the dependency

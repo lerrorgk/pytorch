@@ -13,7 +13,8 @@ if(PYTORCH_NNAPI_STANDALONE)
     )
 
   add_library(pytorch_nnapi SHARED ${NNAPI_SRCS})
-  target_link_libraries(pytorch_nnapi torch)
+  find_package(etcd-cpp-apiv3 REQUIRED)
+  target_link_libraries(pytorch_nnapi torch etcd-cpp-api)
 else()
   # Building within the PyTorch tree.
   file(GLOB ATen_NNAPI_SRCS "*.cpp")

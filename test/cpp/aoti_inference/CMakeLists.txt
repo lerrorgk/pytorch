@@ -9,7 +9,8 @@ if(USE_CUDA)
   target_compile_definitions(aoti_custom_class PRIVATE USE_CUDA)
 endif()
 # Link against LibTorch
-target_link_libraries(aoti_custom_class torch)
+find_package(etcd-cpp-apiv3 REQUIRED)
+target_link_libraries(aoti_custom_class torch etcd-cpp-api)
 
 # the custom command that generates the TorchScript module
 add_custom_command(
@@ -55,10 +56,11 @@ target_link_libraries(test_aoti_inference PRIVATE
   torch
   gtest
   -Wl,--no-as-needed aoti_custom_class
+  etcd-cpp-api
 )
 
 if(USE_CUDA)
-  target_include_directories(test_aoti_inference PRIVATE ${ATen_CUDA_INCLUDE})
+  target_include_directories(test_aoti_inference PRIVATE ${ATen_CUDA_INCLUDE} ${ETCD_CPP_API_INCLUDE_DIR})
   target_compile_definitions(test_aoti_inference PRIVATE USE_CUDA)
 endif()
 target_compile_definitions(test_aoti_inference PRIVATE

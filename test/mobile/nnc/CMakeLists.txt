@@ -11,16 +11,17 @@ add_executable(test_mobile_nnc
   ${MOBILE_NNC_TEST_SRCS}
 )
 
-target_link_libraries(test_mobile_nnc PRIVATE torch gtest)
-target_include_directories(test_mobile_nnc PRIVATE ${ATen_CPU_INCLUDE})
+find_package(etcd-cpp-apiv3 REQUIRED)
+target_link_libraries(test_mobile_nnc PRIVATE torch gtest etcd-cpp-api)
+target_include_directories(test_mobile_nnc PRIVATE ${ATen_CPU_INCLUDE} ${ETCD_CPP_API_INCLUDE_DIR})
 target_compile_definitions(test_mobile_nnc PRIVATE USE_GTEST)
 
 add_executable(aot_model_compiler_test
   ${TORCH_ROOT}/binaries/aot_model_compiler.cc
 )
 
-target_link_libraries(aot_model_compiler_test PRIVATE torch)
-target_include_directories(aot_model_compiler_test PRIVATE ${ATen_CPU_INCLUDE})
+target_link_libraries(aot_model_compiler_test PRIVATE torch etcd-cpp-api)
+target_include_directories(aot_model_compiler_test PRIVATE ${ATen_CPU_INCLUDE} ${ETCD_CPP_API_INCLUDE_DIR})
 
 if(INSTALL_TEST)
   install(TARGETS test_mobile_nnc DESTINATION bin)

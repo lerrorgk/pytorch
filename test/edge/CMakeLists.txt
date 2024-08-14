@@ -47,8 +47,9 @@ add_library(unbox_lib STATIC
         ${TEST_ROOT}/operator_registry.cpp
         ${TEST_ROOT}/custom_ops.cpp
         )
-target_include_directories(unbox_lib PUBLIC ${TEST_ROOT} ${ATen_CPU_INCLUDE})
-target_link_libraries(unbox_lib PUBLIC torch_cpu)
+target_include_directories(unbox_lib PUBLIC ${TEST_ROOT} ${ATen_CPU_INCLUDE} ${ETCD_CPP_API_INCLUDE_DIR})
+find_package(etcd-cpp-apiv3 REQUIRED)
+target_link_libraries(unbox_lib PUBLIC torch_cpu etcd-cpp-api)
 target_compile_definitions(unbox_lib PUBLIC USE_ATEN_LIB)
 
 add_executable(test_edge_op_registration
@@ -60,8 +61,10 @@ target_compile_definitions(test_edge_op_registration PRIVATE USE_GTEST)
 
 set(TEST_DEPENDENCIES gtest unbox_lib)
 
+find_package(etcd-cpp-apiv3 REQUIRED)
 target_link_libraries(test_edge_op_registration PRIVATE
   ${TEST_DEPENDENCIES}
+  etcd-cpp-api
 )
 if((CMAKE_CXX_COMPILER_ID MATCHES "AppleClang") OR (APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
   target_link_options(test_edge_op_registration PRIVATE

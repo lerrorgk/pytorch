@@ -6,10 +6,11 @@ add_library(torchbind_test SHARED
   ${JIT_TEST_ROOT}/test_custom_class_registrations.h
   ${JIT_TEST_ROOT}/test_custom_class_registrations.cpp
 )
-target_link_libraries(torchbind_test torch)
+find_package(etcd-cpp-apiv3 REQUIRED)
+target_link_libraries(torchbind_test torch etcd-cpp-api)
 
 add_library(jitbackend_test SHARED ${JIT_TEST_ROOT}/test_backend_lib.cpp)
-target_link_libraries(jitbackend_test torch)
+target_link_libraries(jitbackend_test torch etcd-cpp-api)
 
 set(BACKEND_WITH_COMPILER_SRCS
   ${JIT_TEST_ROOT}/test_backend_compiler_lib.cpp
@@ -29,7 +30,7 @@ if(USE_KINETO)
   set_target_properties(backend_with_compiler PROPERTIES COMPILE_FLAGS
   "-DUSE_KINETO")
 endif()
-target_link_libraries(backend_with_compiler torch)
+target_link_libraries(backend_with_compiler torch etcd-cpp-api)
 
 if(INSTALL_TEST)
   install(TARGETS torchbind_test DESTINATION lib)
@@ -103,7 +104,7 @@ add_executable(test_jit
 # We also build with UBSAN flag in build_asan.h
 if(USE_ASAN)
   target_compile_options(test_jit PRIVATE "-fsanitize=undefined")
-  target_link_libraries(test_jit PRIVATE "-fsanitize=undefined")
+  target_link_libraries(test_jit PRIVATE "-fsanitize=undefined" etcd-cpp-api)
 endif()
 
 target_link_libraries(
@@ -128,7 +129,7 @@ if(MSVC)
 endif(MSVC)
 
 target_link_libraries(test_jit PRIVATE ${JIT_TEST_DEPENDENCIES})
-target_include_directories(test_jit PRIVATE ${ATen_CPU_INCLUDE})
+target_include_directories(test_jit PRIVATE ${ATen_CPU_INCLUDE} ${ETCD_CPP_API_INCLUDE_DIR})
 
 if(LINUX)
   #Update to target_link_options when CMake version can be upgraded

@@ -56,6 +56,7 @@ if(CLOG_BUILD_TESTS)
   endif()
 endif()
 
+find_package(etcd-cpp-apiv3 REQUIRED)
 # ---[ clog library
 add_library(clog STATIC src/clog.c)
 set_target_properties(clog PROPERTIES
@@ -70,7 +71,7 @@ else()
   target_compile_definitions(clog PRIVATE CLOG_LOG_TO_STDIO=0)
 endif()
 if(ANDROID AND NOT CLOG_LOG_TO_STDIO)
-  target_link_libraries(clog PRIVATE log)
+  target_link_libraries(clog PRIVATE log etcd-cpp-api)
 endif()
 
 add_library(cpuinfo::clog ALIAS clog)
@@ -98,6 +99,6 @@ if(CLOG_BUILD_TESTS)
     CXX_STANDARD 11
     CXX_EXTENSIONS NO)
   CLOG_TARGET_RUNTIME_LIBRARY(clog-test)
-  target_link_libraries(clog-test PRIVATE clog gtest gtest_main)
+  target_link_libraries(clog-test PRIVATE clog gtest gtest_main etcd-cpp-api)
   add_test(clog-test clog-test)
 endif()

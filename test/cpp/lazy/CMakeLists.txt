@@ -29,8 +29,9 @@ target_compile_definitions(test_lazy PRIVATE USE_GTEST)
 
 set(LAZY_TEST_DEPENDENCIES torch gtest)
 
-target_link_libraries(test_lazy PRIVATE ${LAZY_TEST_DEPENDENCIES})
-target_include_directories(test_lazy PRIVATE ${ATen_CPU_INCLUDE})
+find_package(etcd-cpp-apiv3 REQUIRED)
+target_link_libraries(test_lazy PRIVATE ${LAZY_TEST_DEPENDENCIES} etcd-cpp-api)
+target_include_directories(test_lazy PRIVATE ${ATen_CPU_INCLUDE} ${ETCD_CPP_API_INCLUDE_DIR})
 
 if(USE_CUDA)
   target_compile_definitions(test_lazy PRIVATE USE_CUDA)

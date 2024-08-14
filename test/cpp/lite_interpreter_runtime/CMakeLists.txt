@@ -11,7 +11,8 @@ add_library(backend_with_compiler_runtime SHARED
         ${TORCH_ROOT}/test/cpp/jit/test_backend_compiler_lib.cpp
         ${TORCH_ROOT}/torch/csrc/jit/backends/backend_interface.cpp
         )
-target_link_libraries(backend_with_compiler_runtime PRIVATE torch)
+find_package(etcd-cpp-apiv3 REQUIRED)
+target_link_libraries(backend_with_compiler_runtime PRIVATE torch etcd-cpp-api)
 
 add_executable(
   test_lite_interpreter_runtime
@@ -19,12 +20,13 @@ add_executable(
 target_include_directories(
   test_lite_interpreter_runtime PRIVATE
   ${ATen_CPU_INCLUDE}
+  ${ETCD_CPP_API_INCLUDE_DIR}
 )
 
-target_link_libraries(test_lite_interpreter_runtime PRIVATE torch gtest backend_with_compiler_runtime)
+target_link_libraries(test_lite_interpreter_runtime PRIVATE torch gtest backend_with_compiler_runtime etcd-cpp-api)
 
 if(LINUX)
-  target_link_libraries(test_lite_interpreter_runtime PRIVATE "-Wl,--no-as-needed,$<TARGET_FILE:backend_with_compiler_runtime>,--as-needed")
+  target_link_libraries(test_lite_interpreter_runtime PRIVATE "-Wl,--no-as-needed,$<TARGET_FILE:backend_with_compiler_runtime>,--as-needed" etcd-cpp-api)
 endif()
 
 if(INSTALL_TEST)
